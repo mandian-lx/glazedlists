@@ -1,0 +1,454 @@
+diff -up ./build.xml.build-xml ./build.xml
+--- ./build.xml.build-xml	2015-02-16 13:37:42.000000000 +1000
++++ ./build.xml	2016-06-07 17:54:03.098545455 +1000
+@@ -167,11 +167,8 @@
+ 			<packageset dir="source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>
+ 			<packageset dir="extensions/calculation/source"><exclude name="**/impl/**"/></packageset>
+ 			<packageset dir="extensions/swt/source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>
+-			<packageset dir="extensions/ktable/source"><exclude name="**/impl/**"/></packageset>
+ 			<packageset dir="extensions/jgoodiesforms/source"><exclude name="**/impl/**"/></packageset>
+-			<packageset dir="extensions/nachocalendar/source"><exclude name="**/impl/**"/></packageset>
+ 			<packageset dir="extensions/jfreechart/source"><exclude name="**/impl/**"/></packageset>
+-			<packageset dir="extensions/swinglabs/source"><exclude name="**/impl/**"/></packageset>
+ 			<packageset dir="extensions/hibernate/source"><exclude name="**/impl/**"/></packageset>			
+ 			<packageset dir="extensions/treetable/source"><exclude name="**/impl/**"/></packageset>			
+             <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
+@@ -229,16 +226,8 @@
+     <target name="jar" depends="compileall,update-version-properties"
+         description="Creates glazedlists jar file (which is also a valid OSGi bundle) containing all UI libraries.">
+ 
+-        <mkdir dir="tools"/>
+-        <!--download the BND library for creating entries in the manifest.mf file which make it a compliant OSGi bundle. See http://www.osgi.org/ -->
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.tools.url}/bnd/bnd.jar"/>
+-            <arg value="tools/bnd.jar"/>
+-        </java>
+-
+         <!-- prepare the bnd task which generates OSGi bundle JARs -->
+-        <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="tools/bnd.jar"/>
++        <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="TASKDEF_CLASSPATH"/>
+ 
+         <!-- create a normal jar file -->
+         <jar destfile="${target.dir}/${jar.file}" update="true" index="true">
+@@ -307,45 +296,45 @@
+ 		description="Compile the default components of the source.">
+ 	</target>
+ 
+-	<target name="compileall" depends="core,migrationkit,swing,io,calculation,swt,ktable,issuesbrowser,swinglabs,hibernate,icu4j"
+-		description="Compile all components of the source.">
+-	</target>
++	<target name="compileall" depends="core,migrationkit,swing,io,calculation,swt,treetable,hibernate,icu4j"
++ 		description="Compile all components of the source.">
++ 	</target>
+ 
+ 	<target name="core">
+-        <mkdir dir="${classes.dir}"/>
+-		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <!-- swing -->
+-            <exclude name="**/swing/**"/>
+-            <!-- io -->
+-            <exclude name="**/ctp/**"/>
+-            <exclude name="**/io/**"/>
+-            <exclude name="**/nio/**"/>
+-            <exclude name="**/pmap/**"/>
+-            <exclude name="**/rbp/**"/>
+-		</javac>
++	    <mkdir dir="${classes.dir}"/>
++	    <javac includeantruntime="false" destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++                <!-- swing -->
++		<exclude name="**/swing/**"/>
++                <!-- io -->
++		<exclude name="**/ctp/**"/>
++		<exclude name="**/io/**"/>
++		<exclude name="**/nio/**"/>
++		<exclude name="**/pmap/**"/>
++		<exclude name="**/rbp/**"/>
++	    </javac>
++	</target>
++
++	<target name="migrationkit" depends="core">
++	    <javac includeantruntime="false" destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++		<include name="**/migrationkit/**"/>
++	    </javac>
+ 	</target>
+ 
+-    <target name="migrationkit" depends="core">
+-        <javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <include name="**/migrationkit/**"/>
+-        </javac>
+-    </target>
+-
+ 	<target name="swing" depends="core">
+-		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-			<include name="**/swing/**"/>
+-			<exclude name="**/migrationkit/**"/>
+-		</javac>
++	    <javac includeantruntime="false" destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++		<include name="**/swing/**"/>
++		<exclude name="**/migrationkit/**"/>
++	    </javac>
+ 	</target>
+ 
+ 	<target name="io" depends="core">
+-		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-			<include name="**/ctp/**"/>
+-			<include name="**/io/**"/>
+-			<include name="**/nio/**"/>
+-			<include name="**/pmap/**"/>
+-			<include name="**/rbp/**"/>
+-		</javac>
++	    <javac includeantruntime="false" destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++		<include name="**/ctp/**"/>
++		<include name="**/io/**"/>
++		<include name="**/nio/**"/>
++		<include name="**/pmap/**"/>
++		<include name="**/rbp/**"/>
++	    </javac>
+ 	</target>
+ 
+ 
+@@ -354,97 +343,35 @@
+      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+ 
+     <target name="calculation" depends="swing">
+-        <mkdir dir="extensions/calculation/lib"/>
+-        <javac destdir="${classes.dir}" srcdir="extensions/calculation/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/calculation/lib/" includes="*.jar"/>
+-            </classpath>
+-        </javac>
++	<javac includeantruntime="false" destdir="${classes.dir}" srcdir="extensions/calculation/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++	</javac>
+     </target>
+ 
+     <target name="swt" depends="core,calculation">
+-        <mkdir dir="extensions/swt/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${swt.jar.path}/${swt.jar.file}"/>
+-            <arg value="extensions/swt/lib/${swt.jar.file}"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/swt/lib/" includes="*.jar"/>
+-            </classpath>
++	<javac includeantruntime="false" destdir="${classes.dir}" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++	    <classpath>
++		<fileset dir="ECLIPSE_DIR" includes="swt.jar"/>
++	    </classpath>
+         </javac>
+-    </target>
+-
+-    <target name="ktable" depends="core,swt,issuesbrowser">
+-        <mkdir dir="extensions/ktable/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/ktable/2.1.2/ktable.jar"/>
+-            <arg value="extensions/ktable/lib/ktable.jar"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/ktable/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++        <javac destdir="${classes.dir}" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+             <classpath>
+-                <fileset dir="extensions/ktable/lib/" includes="*.jar"/>
+                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
+             </classpath>
+         </javac>
+     </target>
+ 
+     <target name="jgoodiesforms" depends="swing">
+-        <mkdir dir="extensions/jgoodiesforms/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/forms/1.0.5/forms.jar"/>
+-            <arg value="extensions/jgoodiesforms/lib/forms.jar"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/jgoodiesforms/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/jgoodiesforms/lib/" includes="*.jar"/>
+-            </classpath>
+-        </javac>
+-    </target>
+-
+-    <target name="swinglabs" depends="swing, issuesbrowser">
+-        <!-- the swinglabs .jar is Java 1.5+ only, so we do not bother to run
+-             this code through our Java 1.5 to Java 1.4 source code translator -->
+-        <mkdir dir="extensions/swinglabs/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>        	
+-            <arg value="${download.lib.url}/swinglabs/1.0.0/swingx.jar"/>
+-            <arg value="extensions/swinglabs/lib/swingx.jar"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/swinglabs/lib/" includes="*.jar"/>
+-            </classpath>
++	<javac includeantruntime="false" destdir="${classes.dir}" srcdir="extensions/jgoodiesforms/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++	    <classpath>
++		<fileset dir="/usr/share/java" includes="jgoodies-forms.jar"/>
++	    </classpath>
+         </javac>
+     </target>
+ 
+     <target name="icu4j" depends="swing">
+-        <mkdir dir="extensions/icu4j/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/icu4j/3.6/icu4j.jar"/>
+-            <arg value="extensions/icu4j/lib/icu4j.jar"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/icu4j/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/icu4j/lib/" includes="*.jar"/>
+-            </classpath>
+-        </javac>
+-    </target>
+-
+-    <target name="nachocalendar" depends="swing">
+-        <mkdir dir="extensions/nachocalendar/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/nachocalendar/0.23/nachocalendar.jar"/>
+-            <arg value="extensions/nachocalendar/lib/nachocalendar.jar"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/nachocalendar/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/nachocalendar/lib/" includes="*.jar"/>
++	<javac includeantruntime="false" destdir="${classes.dir}" srcdir="extensions/icu4j/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++	    <classpath>
++		<fileset dir="/usr/share/java/icu4j" includes="icu4j.jar"/>
+             </classpath>
+         </javac>
+     </target>
+@@ -454,206 +381,21 @@
+     </target>
+ 
+     <target name="jfreechart" depends="swing,calculation">
+-        <mkdir dir="extensions/jfreechart/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/jfreechart/1.0.0/jcommon.jar"/>
+-            <arg value="extensions/jfreechart/lib/jcommon.jar"/>
+-        </java>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/jfreechart/1.0.0/jfreechart.jar"/>
+-            <arg value="extensions/jfreechart/lib/jfreechart.jar"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/jfreechart/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
++	<javac includeantruntime="false" destdir="${classes.dir}" srcdir="extensions/jfreechart/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
++	    <classpath>
++		<fileset dir="/usr/share/java" includes="jfreechart.jar jcommon.jar"/>
+             </classpath>
+         </javac>
+     </target>
+ 
+-	<target name="hibernate" depends="core">
+-        <mkdir dir="extensions/hibernate/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/hibernate/3.6.8.Final/hibernate.jar"/>
+-            <arg value="extensions/hibernate/lib/hibernate.jar"/>
+-        </java>		
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/hibernate/3.6.8.Final/hibernate-libs.jar"/>
+-            <arg value="extensions/hibernate/lib/hibernate-libs.jar"/>
+-        </java>				
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/hsqldb/2.2.6/hsqldb-jdk5.jar"/>
+-            <arg value="extensions/hibernate/lib/hsqldb-jdk5.jar"/>
+-        </java>				
+-        <javac destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/hibernate/lib/" includes="*.jar"/>
+-            </classpath>
+-        </javac>
++    <target name="hibernate" depends="core">
++	<javac includeantruntime="false" destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">         
++	    <classpath>
++		<fileset dir="/usr/share/java/hibernate3/" includes="*.jar"/>
++	    </classpath>
++	</javac>
+     </target>
+ 
+-    <target name="japex" depends="compile">
+-        <!-- download dependencies for japex -->
+-        <mkdir dir="extensions/japex/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/japex/1.0.18/activation.jar"/>
+-            <arg value="extensions/japex/lib/activation.jar"/>
+-        </java>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/japex/1.0.18/japex-all.jar"/>
+-            <arg value="extensions/japex/lib/japex-all.jar"/>
+-        </java>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/japex/1.0.18/mail.jar"/>
+-            <arg value="extensions/japex/lib/mail.jar"/>
+-        </java>
+-        <!-- compile the Japex performance tests -->
+-        <javac destdir="${classes.dir}" srcdir="extensions/japex/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/japex/lib/" includes="*.jar"/>
+-            </classpath>
+-        </javac>
+-        <!-- execute the Japex performance tests -->
+-    	<!--
+-        <property name="config" value="extensions/japex/ListEventAssembler-JapexConfig.xml"/>
+-        <property name="config" value="extensions/japex/ListEventPublisher-JapexConfig.xml"/>
+-        <property name="config" value="extensions/japex/SortedList-JapexConfig.xml"/>
+-        -->
+-        <property name="config" value="extensions/japex/ThreadProxy-JapexConfig.xml"/>
+-        <java dir="." fork="true" classname="com.sun.japex.Japex">
+-            <classpath>
+-                <fileset dir="extensions/japex/lib/" includes="*.jar"/>
+-            </classpath>
+-        	<sysproperty key="japex.reportsDirectory" value="${reports.dir}"/>
+-            <arg line="${config}/"/>
+-        </java>
+-    </target>
+-
+-    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms,nachocalendar,treetable">
+-        <mkdir dir="extensions/issuesbrowser/lib"/>
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/httpclient/0.3.3/http.jar"/>
+-            <arg value="extensions/issuesbrowser/lib/http.jar"/>
+-        </java>
+-        <javac destdir="${classes.dir}" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+-            <classpath>
+-                <fileset dir="extensions/swt/lib/" includes="*.jar"/>
+-                <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
+-                <fileset dir="extensions/jgoodiesforms/lib/" includes="*.jar"/>
+-                <fileset dir="extensions/nachocalendar/lib/" includes="*.jar"/>
+-                <fileset dir="extensions/issuesbrowser/lib/" includes="*.jar"/>
+-            </classpath>
+-        </javac>
+-    </target>
+-
+-    <!-- check if the user already has BCEL in their ANT \lib directory (which is required to execute the "demojar" target -->
+-    <available classname="org.apache.bcel.Constants" property="bcel.present"/>
+-
+-    <target name="downloadBCEL" unless="bcel.present">
+-        <!-- explain the BCEL requirement -->
+-        <echo>To build the demojar, Glazed Lists requires the Byte Code Engineering Library (BCEL) to be available in the \lib directory of your ANT installation. The Glazed Lists build system will now automatically attempt to download the BCEL into ${ant.home}\lib on your behalf.</echo>
+-
+-        <!-- wait for the user to read the message before continuing -->
+-        <input>Press Return to begin the download...</input>
+-
+-        <!-- download bcel.jar to the ant \lib directory -->
+-        <java classname="ca.odell.glazedlists.impl.HttpClient">
+-            <classpath path="${classes.dir}"/>
+-            <arg value="${download.lib.url}/bcel/5.2/bcel.jar"/>
+-            <arg value="${ant.home}/lib/bcel.jar"/>
+-        </java>
+-
+-        <!-- recheck if bcel.jar is now in the ANT \lib directory -->
+-        <available classname="org.apache.bcel.Constants" property="bcel.present"/>
+-
+-        <!-- check if bcel.jar was downloaded successfully and display the instructions to rerun the ANT command. -->
+-        <fail message="BCEL has been successfully downloaded. Please re-execute the ANT task and it will now proceed normally.">
+-            <condition>
+-                <available file="${ant.home}/lib/bcel.jar"/>
+-            </condition>
+-        </fail>
+-
+-        <!-- otherwise bcel.jar could not be downloaded so fail with instructions on how to resolve the problem manually -->
+-        <fail message="The BCEL could not be downloaded. You must manually download it from here: http://jakarta.apache.org/site/downloads/downloads_bcel.cgi and place it in your ANT installation here: ${ant.home}\lib"/>
+-    </target>
+-
+-    <target name="issuesbrowserjar" depends="clean,issuesbrowser,downloadBCEL"
+-        description="Create a .jar file with the Issues Browser demo application.">
+-
+-        <!-- make a temporary folder for assembling the demojar -->
+-        <mkdir dir="${issuesbrowserjar.dir}"/>
+-
+-        <!-- copy the classes into the demojar folder -->
+-        <copy todir="${issuesbrowserjar.dir}">
+-            <fileset dir="${classes.dir}"/>
+-        </copy>
+-
+-        <!-- unjar the third-party classes into the demojar folder -->
+-        <unjar src="extensions/jfreechart/lib/jcommon.jar" dest="${issuesbrowserjar.dir}"/>
+-        <unjar src="extensions/jfreechart/lib/jfreechart.jar" dest="${issuesbrowserjar.dir}"/>
+-        <unjar src="extensions/jgoodiesforms/lib/forms.jar" dest="${issuesbrowserjar.dir}"/>
+-        <unjar src="extensions/nachocalendar/lib/nachocalendar.jar" dest="${issuesbrowserjar.dir}"/>
+-        <unjar src="extensions/issuesbrowser/lib/http.jar" dest="${issuesbrowserjar.dir}"/>
+-
+-        <!-- create a *minimal* set of classes required to execute the swing demo -->
+-        <classfileset id="issuesBrowserClasses" dir="${issuesbrowserjar.dir}" rootclass="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
+-
+-        <!-- create the actual demo jar -->
+-        <jar destfile="${target.dir}/glazedlists-demo.jar" update="true" index="true">
+-            <fileset refid="issuesBrowserClasses"/>
+-            <fileset dir="${issuesbrowserjar.dir}">
+-                <include name="**/LocalizationBundle*.properties"/>
+-                <include name="org/jfree/chart/resources/JFreeChartResources.class"/>
+-                <include name="org/jfree/resources/JCommonResources.class"/>
+-                <include name="net/sf/nachocalendar/language*.properties"/>
+-            </fileset>
+-            <fileset dir=".">
+-                <include name="resources/**"/>
+-            </fileset>
+-            <fileset dir="extensions/issuesbrowser">
+-                <include name="resources/**"/>
+-            </fileset>
+-            <manifest>
+-                <attribute name="Main-Class" value="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
+-            </manifest>
+-        </jar>
+-	</target>
+-
+-    <target name="xmlbrowserjar" depends="clean,issuesbrowser,downloadBCEL"
+-        description="Create a .jar file with the Xml Browser demo application.">
+-
+-        <!-- make a temporary folder for assembling the demojar -->
+-        <mkdir dir="${xmlbrowser.dir}"/>
+-
+-        <!-- copy the classes into the xmlbrowser folder -->
+-        <copy todir="${xmlbrowser.dir}">
+-            <fileset dir="${classes.dir}"/>
+-        </copy>
+-
+-        <!-- xmlToEventList a *minimal* set of classes required to execute the swing demo -->
+-        <classfileset id="xmlBrowserClasses" dir="${xmlbrowser.dir}" rootclass="com.publicobject.xmlbrowser.XmlBrowser"/>
+-
+-        <!-- xmlToEventList the actual demo jar -->
+-        <jar destfile="${target.dir}/xmlbrowser.jar" update="true" index="true">
+-            <fileset refid="xmlBrowserClasses"/>
+-            <fileset dir=".">
+-                <include name="resources/**"/>
+-                <include name="pom.xml"/>
+-            </fileset>
+-            <manifest>
+-                <attribute name="Main-Class" value="com.publicobject.xmlbrowser.XmlBrowser"/>
+-            </manifest>
+-        </jar>
+-	</target>
+-
+ 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ 	   REDISTRIBUTING THE SOURCE
+ 	   Package the entire Glazed Lists source tree in a .zip file.
+@@ -810,7 +552,7 @@
+     </target>
+ 	
+ 	<!-- initializes deploy directory with the needed artifacts -->
+-    <target name="deploy-init" depends="download-mavenanttasks, check-snapshot-version">
++    <target name="deploy-init" depends="check-snapshot-version">
+     	<echo message="Preparing artifacts for deployment..."/>
+         <mkdir dir="${deploy.dir}" />
+         <copy file="pom.xml" todir="${deploy.dir}" filtering="true" failonerror="true"/>
+@@ -980,4 +722,4 @@
+         </delete>
+     </target>
+ 
+-</project>
+\ No newline at end of file
++</project>

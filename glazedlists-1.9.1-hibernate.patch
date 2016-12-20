@@ -1,0 +1,43 @@
+diff -up ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/EventListType.java.hibernate ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/EventListType.java
+--- ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/EventListType.java.hibernate	2015-10-13 10:57:00.922741522 +1000
++++ ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/EventListType.java	2015-10-13 11:00:41.704738322 +1000
+@@ -9,8 +9,8 @@ import ca.odell.glazedlists.event.ListEv
+ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+ 
+ import org.hibernate.HibernateException;
+-import org.hibernate.collection.PersistentCollection;
+-import org.hibernate.engine.SessionImplementor;
++import org.hibernate.collection.spi.PersistentCollection;
++import org.hibernate.engine.spi.SessionImplementor;
+ import org.hibernate.persister.collection.CollectionPersister;
+ import org.hibernate.usertype.ParameterizedType;
+ import org.hibernate.usertype.UserCollectionType;
+@@ -144,4 +144,5 @@ public class EventListType implements Us
+     public PersistentCollection wrap(SessionImplementor session, Object collection) {
+         return new PersistentEventList(session, (EventList) collection);
+     }
+-}
+\ No newline at end of file
++}
++
+diff -up ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/PersistentEventList.java.hibernate ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/PersistentEventList.java
+--- ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/PersistentEventList.java.hibernate	2015-10-13 10:57:00.922741522 +1000
++++ ./extensions/hibernate/source/ca/odell/glazedlists/hibernate/PersistentEventList.java	2015-10-13 11:01:29.428737630 +1000
+@@ -10,8 +10,8 @@ import ca.odell.glazedlists.event.ListEv
+ import ca.odell.glazedlists.event.ListEventListener;
+ import ca.odell.glazedlists.event.ListEventPublisher;
+ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+-import org.hibernate.collection.PersistentList;
+-import org.hibernate.engine.SessionImplementor;
++import org.hibernate.collection.internal.PersistentList;
++import org.hibernate.engine.spi.SessionImplementor;
+ import org.hibernate.persister.collection.CollectionPersister;
+ 
+ import java.io.IOException;
+@@ -150,4 +150,4 @@ public final class PersistentEventList e
+             updates.addListEventListener(listeners[i]);
+         }
+     }
+-}
+\ No newline at end of file
++}
