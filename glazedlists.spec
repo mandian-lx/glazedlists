@@ -75,11 +75,12 @@ sed -i -e '/"deploy-init"/ s/download-mavenanttasks,//' build.xml
 %build
 ant -v dist jar sourcejar javadocjar deploy-init -DartifactId=%{name}
 
-# Maven artifact installation
-%add_maven_depmap target/deploy/pom.xml target/deploy/%{name}-%{version}.jar
 
 %install
 %mvn_install -J target/docs/api
+
+# Maven artifact installation
+%add_maven_depmap target/deploy/pom.xml target/deploy/%{name}-%{version}.jar
 
 %files -f .mfiles
 %doc license readme.html
