@@ -85,7 +85,7 @@ ant -v dist jar sourcejar javadocjar deploy-init -DartifactId=%{name}
 %files -f .mfiles
 %doc license readme.html
 %dir %{_javadir}/glazedlists
-%dir %{_mavenpomdir}/glazedlists
+#dir %{_mavenpomdir}/glazedlists
 
 %files javadoc -f .mfiles-javadoc
 %doc license
