@@ -216,7 +216,7 @@ diff -up ./build.xml.build-xml ./build.xml
 -                <fileset dir="extensions/nachocalendar/lib/" includes="*.jar"/>
 +	<javac includeantruntime="false" destdir="${classes.dir}" srcdir="extensions/icu4j/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
 +	    <classpath>
-+		<fileset dir="/usr/share/java/icu4j" includes="icu4j.jar"/>
++		<fileset dir="/usr/share/java" includes="icu4j.jar"/>
              </classpath>
          </javac>
      </target>
