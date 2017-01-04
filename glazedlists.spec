@@ -18,7 +18,8 @@ Patch0:         %{name}-1.9.1-build.xml.patch
 # Use the new Hibernate API
 Patch1:         %{name}-1.9.1-hibernate.patch
 
-BuildRequires:  javapackages-local
+BuildRequires:  jpackage-utils
+BuildRequires:  java-devel
 BuildRequires:  ant
 BuildRequires:  dos2unix
 BuildRequires:  aqute-bnd
