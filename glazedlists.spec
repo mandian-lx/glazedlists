@@ -18,9 +18,10 @@ Patch0:         %{name}-1.9.1-build.xml.patch
 # Use the new Hibernate API
 Patch1:         %{name}-1.9.1-hibernate.patch
 
-BuildRequires:  jpackage-utils
 BuildRequires:  java-devel
+BuildRequires:  jpackage-utils
 BuildRequires:  ant
+BuildRequires:  maven-local
 BuildRequires:  dos2unix
 BuildRequires:  aqute-bnd
 BuildRequires:  aqute-bndlib
@@ -75,12 +76,11 @@ sed -i -e '/"deploy-init"/ s/download-mavenanttasks,//' build.xml
 %build
 ant -v dist jar sourcejar javadocjar deploy-init -DartifactId=%{name}
 
+# Maven artifact installation
+%mvn_artifact target/deploy/pom.xml target/deploy/%{name}-%{version}.jar
 
 %install
 %mvn_install -J target/docs/api
-
-# Maven artifact installation
-%add_maven_depmap target/deploy/pom.xml target/deploy/%{name}-%{version}.jar
 
 %files -f .mfiles
 %doc license readme.html
