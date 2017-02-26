@@ -1,3 +1,5 @@
+%{?_javapackages_macros:%_javapackages_macros}
+
 # Work around koji build issues on ppc64
 # See https://www.redhat.com/archives/fedora-devel-list/2009-March/msg00022.html
 %global eclipse_dir $(ls -d /usr/lib*/eclipse)
@@ -18,7 +20,6 @@ Patch0:         %{name}-1.9.1-build.xml.patch
 # Use the new Hibernate API
 Patch1:         %{name}-1.9.1-hibernate.patch
 
-BuildRequires:  java-devel
 BuildRequires:  jpackage-utils
 BuildRequires:  ant
 BuildRequires:  maven-local
