@@ -1,3 +1,5 @@
+%{?_javapackages_macros:%_javapackages_macros}
+
 # Work around koji build issues on ppc64
 # See https://www.redhat.com/archives/fedora-devel-list/2009-March/msg00022.html
 %global eclipse_dir $(ls -d /usr/lib*/eclipse)
