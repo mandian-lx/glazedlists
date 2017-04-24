@@ -80,6 +80,9 @@ ant -v dist jar sourcejar javadocjar deploy-init -DartifactId=%{name}
 # Maven artifact installation
 %mvn_artifact target/deploy/pom.xml target/deploy/%{name}-%{version}.jar
 
+# add compatibility alias
+%mvn_alias net.java.dev.glazedlists:glazedlists net.java.dev.glazedlists:glazedlists_java15
+
 %install
 %mvn_install -J target/docs/api
 
